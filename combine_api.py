@@ -104,6 +104,25 @@ def drawdot_txt_img(coordinates, input_path, output_path):
     print(f"dot_img write to: {output_path}")
     cv2.imwrite(output_path, img)
 
+# draw num in img
+def drawnum_txt_img(coordinates, input_path, output_path):
+    # 读取了一张图像到 img 中
+    img = cv2.imread(input_path)
+ 
+    # 逐个绘制
+    for i, coord in enumerate(coordinates):
+        l = coord.split(' ')
+        x, y, w, h = int(l[1]), int(l[2]), int(l[3]), int(l[4])
+        x2, y2 = x + w, y + h
+              
+        # 圆心坐标
+        cx, cy = (x + x2) // 2, (y + y2) // 2
+        
+        # 绘制数字
+        cv2.putText(img, str(i), (cx, cy), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
+    print(f"num_img write to: {output_path}")
+    cv2.imwrite(output_path, img)
+
 # 将压缩图片进行转换，并存储
 def transform_save(img_path, img_transform_path):
     img_obj = transform_img(img_path, img_transform_path)
@@ -129,14 +148,21 @@ def txt_circle_save(img_path, output_path, txt_path):
         coordinates = f.readlines()
     drawdot_txt_img(coordinates, img_path, output_path)
 
+def txt_num_save(img_path, output_path, txt_path):
+    coordinates = None
+    with open(txt_path, 'r', encoding='utf-8') as f:
+        coordinates = f.readlines()
+    drawnum_txt_img(coordinates, img_path, output_path)
+
 
 if __name__ == '__main__':
     base_url = "https://caiwei.obs.cn-north-4.myhuaweicloud.com/temp/test_crop/shuidao/"
-    transform_base = "transform_img/shuidao"
-    draw_base = "draw_circle/shuidao"
-    base_img_path = "compress_img"
-    txt_base_path = "need_check_txt/shuidao"
+    transform_base = "transform_img/shuidao" # 转换图片父目录
+    draw_base = "draw_circle/shuidao" # 标注圆父目录
+    base_img_path = "compress_img" # 图片父目录
+    txt_base_path = "need_check_txt/shuidao" # 保存api输出父目录
     output_img_base = "output_img_test/shuidao"
+    num_base_path = "draw_num_img/shuidao" # 标注数字父目录
 
     # 对图像传给api并将其结果保存到txt文件中
     # for img_name in os.listdir(base_img_path):
@@ -146,13 +172,22 @@ if __name__ == '__main__':
     #     output_txt_path = os.path.join(txt_base_path, txt_name)
     #     api_result_save(img_url, output_txt_path)
 
-    # 使用txt文件中的数据标注图像
+    # 使用txt文件中的数据标注圆到图像
+    # for txt_name in os.listdir(txt_base_path):
+    #     img_name = txt_name.replace(".txt", ".jpg")
+    #     img_path = os.path.join(base_img_path, img_name)
+    #     out_img_path = os.path.join(output_img_base, img_name)
+    #     txt_path = os.path.join(txt_base_path, txt_name)
+    #     txt_circle_save(img_path, out_img_path, txt_path)
+    
+    # 使用txt文件中的数据标注数字到图像
     for txt_name in os.listdir(txt_base_path):
         img_name = txt_name.replace(".txt", ".jpg")
         img_path = os.path.join(base_img_path, img_name)
-        out_img_path = os.path.join(output_img_base, img_name)
+        out_img_path = os.path.join(num_base_path, img_name)
         txt_path = os.path.join(txt_base_path, txt_name)
-        txt_circle_save(img_path, out_img_path, txt_path)
+        txt_num_save(img_path, out_img_path, txt_path)
+
 
     # 对图像进行转换并保存
     # for img_name in os.listdir(base_img_path):
